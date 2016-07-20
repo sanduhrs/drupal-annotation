@@ -1,9 +1,18 @@
 <?php
 
 /**
+ * @file
+ * Annotation entity.
+ */
+
+/**
  * Annotation entity class.
  */
 class AnnotationClassRevision extends Entity {
+
+  /**
+   * AnnotationClassRevision constructor.
+   */
   public function __construct(array $values = array(), $entityType = NULL) {
     parent::__construct($values, 'annotation');
   }
@@ -16,12 +25,19 @@ class AnnotationClassRevision extends Entity {
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defaultLabel() {
     $type = entity_test_get_types($this->name);
     return $type->label;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defaultUri() {
     return array('path' => 'annotation/' . $this->identifier());
   }
+
 }

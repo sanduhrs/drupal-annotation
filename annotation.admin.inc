@@ -1,13 +1,21 @@
 <?php
+
+/**
+ * @file
+ * Annotation admin pages.
+ */
+
 /**
  * Displays the annotation type admin overview page.
  */
 function annotation_admin_types() {
   $annotation_entity = entity_get_info('annotation');
   $bundles = $annotation_entity['bundles'];
-  //dpm($bundles);
   $field_ui = module_exists('field_ui');
-  $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => $field_ui ? '4' : '2'));
+  $header = array(
+    t('Name'),
+    array('data' => t('Operations'), 'colspan' => $field_ui ? '4' : '2'),
+  );
   $rows = array();
 
   foreach ($bundles as $key => $bundle) {
@@ -16,13 +24,6 @@ function annotation_admin_types() {
     $row = array($name . ' <small>' . t('(Machine name: @type)', array('@type' => $type)) . '</small><div class="description">' . filter_xss_admin($bundle['description']) . '</div>');
     // Set the edit column.
     $row[] = array('data' => l(t('edit'), $bundle['admin']['real path']));
-    /*
-    if ($field_ui) {
-      // Manage fields.
-      $row[] = array('data' => l(t('manage fields'), 'admin/annotation/annotation_types/manage/' . check_plain($type) . '/fields'));
-      // Display fields.
-      $row[] = array('data' => l(t('manage display'), 'admin/annotation/annotation_types/manage/' . check_plain($type) . '/display'));
-    }*/
     // Set the delete column.
     if ($bundle['custom']) {
       $row[] = array('data' => l(t('delete'), 'admin/annotation/annotation_types/manage/' . check_plain($type) . '/delete'));
@@ -38,12 +39,14 @@ function annotation_admin_types() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    //'#empty' => t('No content types available. <a href="@link">Add content type</a>.', array('@link' => url('admin/structure/types/add'))),
   );
 
   return $build;
 }
 
+/**
+ * List of content.
+ */
 function annotation_admin_content($form, $form_state) {
   $admin_access = user_access('administer annotations');
 
@@ -75,23 +78,24 @@ function annotation_admin_content($form, $form_state) {
     'quote' => array('data' => t('Quote'), 'field' => 'a.quote'),
     'uri' => array('data' => t('Uri'), 'field' => 'a.uri'),
     'author' => t('Author'),
-    'timestamp' => array('data' => t('Updated'), 'field' => 'a.updated', 'sort' => 'desc'),
+    'timestamp' => array(
+      'data' => t('Updated'),
+      'field' => 'a.updated',
+      'sort' => 'desc',
+    ),
     'operations' => array('data' => t('Operations')),
   );
 
   $query = db_select('annotation', 'a')->extend('PagerDefault')->extend('TableSort');
-  //file_entity_build_filter_query($query);
 
   $result = $query
     ->fields('a', array('id', 'uid'))
     ->limit(50)
     ->orderByHeader($header)
-    //->addTag('file_access')
     ->execute()
     ->fetchAllKeyed();
   $annotations = entity_load_multiple_by_name('annotation', array_keys($result));
   $accounts = user_load_multiple(array_unique($result));
-  
   $destination = drupal_get_destination();
   $options = array();
 
@@ -163,6 +167,9 @@ function annotation_admin_content($form, $form_state) {
   return $form;
 }
 
+/**
+ * Annotation type form.
+ */
 function annotation_type_form($form, &$form_state, $type = NULL) {
   if (!isset($type)) {
     // This is a new type.
@@ -221,6 +228,9 @@ function annotation_type_form($form, &$form_state, $type = NULL) {
   return $form;
 }
 
+/**
+ * Annotation type form; Submit handler.
+ */
 function annotation_type_submit($form, &$form_state) {
   if (!empty($form['#file_type']->type)) {
     $type = file_type_load($form['#file_type']->type);
@@ -243,4 +253,3 @@ function annotation_type_submit($form, &$form_state) {
   drupal_set_message(t('The annotation type %type has been updated.', array('%type' => $type->label)));
   $form_state['redirect'] = 'admin/structure/annotation';
 }
-

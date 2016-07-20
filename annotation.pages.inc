@@ -1,6 +1,12 @@
 <?php
+
 /**
- * View annotation; Menu callback. 
+ * @file
+ * Annotation pages.
+ */
+
+/**
+ * View annotation; Menu callback.
  */
 function annotation_view_page($entity, $view_mode = 'full', $langcode = NULL) {
   if (isset($entity->id)) {
@@ -11,11 +17,17 @@ function annotation_view_page($entity, $view_mode = 'full', $langcode = NULL) {
   }
 }
 
+/**
+ * Annotation view.
+ */
 function annotation_view($entity, $view_mode = 'full', $langcode = NULL) {
   $wrapper = entity_metadata_wrapper('annotation', $entity);
   return $wrapper->view();
 }
 
+/**
+ * Delete form.
+ */
 function annotation_delete_form($form, &$form_state, $annotation) {
   $form_state['annotation'] = $annotation;
 
@@ -36,7 +48,10 @@ function annotation_delete_form($form, &$form_state, $annotation) {
   );
 }
 
-function  annotation_delete_form_submit($form, &$form_state) {
+/**
+ * Delete form; submit handler.
+ */
+function annotation_delete_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && $annotation = entity_object_load($form_state['values']['id'], 'annotation')) {
     entity_delete('annotation', $annotation->id);
 
@@ -53,4 +68,3 @@ function  annotation_delete_form_submit($form, &$form_state) {
   // Clear the page and block caches.
   cache_clear_all();
 }
-

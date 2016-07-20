@@ -1,12 +1,13 @@
 <?php
 
 /**
- * Annotator Store API
+ * @file
+ * Annotator Store API.
  * @see https://github.com/okfn/annotator/wiki/Storage
  */
 
 /**
- * Annotation API main endpoint
+ * Annotation API main endpoint.
  */
 function annotation_api_endpoint($id = NULL) {
   $method = $_SERVER['REQUEST_METHOD'];
@@ -20,20 +21,24 @@ function annotation_api_endpoint($id = NULL) {
         annotation_api_index();
       }
       break;
+
     case 'POST':
       annotation_api_create();
       break;
+
     case 'PUT':
       annotation_api_update($id);
       break;
+
     case 'DELETE':
       annotation_api_destroy($id);
       break;
+
   }
 }
 
 /**
- * Annotation API root
+ * Annotation API root.
  */
 function annotation_api() {
   drupal_json_output(
@@ -45,7 +50,7 @@ function annotation_api() {
 }
 
 /**
- * Annotation API index
+ * Annotation API index.
  */
 function annotation_api_index() {
   if (annotation_access('view')) {
@@ -54,14 +59,14 @@ function annotation_api_index() {
       $records[$rid] = annotation_api_entity_prepare($record, 'read');
     }
 
-    // Send response
+    // Send response.
     return drupal_json_output(array_values($records));
   }
   return FALSE;
 }
 
 /**
- * Annotation API create
+ * Annotation API create.
  */
 function annotation_api_create() {
   if (annotation_access('create')) {
@@ -75,14 +80,14 @@ function annotation_api_create() {
     $entity = annotation_api_entity_prepare($entity, 'create');
     entity_save('annotation', $entity);
 
-    // Send response
+    // Send response.
     return drupal_json_output($entity);
   }
   return FALSE;
 }
 
 /**
- * Annotation API read
+ * Annotation API read.
  */
 function annotation_api_read($id) {
   if ($annotation = entity_object_load($id, 'annotation')) {
@@ -90,7 +95,8 @@ function annotation_api_read($id) {
       $record = entity_load_single('annotation', $id);
       $record = array_shift($record);
       $record = annotation_api_entity_prepare($record, 'read');
-      // Send response
+
+      // Send response.
       return drupal_json_output($record);
     }
   }
@@ -98,7 +104,7 @@ function annotation_api_read($id) {
 }
 
 /**
- * Annotation API update
+ * Annotation API update.
  */
 function annotation_api_update($id) {
   if ($annotation = entity_object_load($id, 'annotation')) {
@@ -107,7 +113,8 @@ function annotation_api_update($id) {
       $entity->updated = REQUEST_TIME;
       $entity = annotation_api_entity_prepare($entity, 'update');
       entity_save('annotation', $entity);
-      // Send response
+
+      // Send response.
       drupal_goto('annotation/api/annotations/' . $id, array(), 303);
       return TRUE;
     }
@@ -116,13 +123,14 @@ function annotation_api_update($id) {
 }
 
 /**
- * Annotation API destroy
+ * Annotation API destroy.
  */
 function annotation_api_destroy($id) {
   if ($annotation = entity_object_load($id, 'annotation')) {
     if (annotation_access('delete', $annotation)) {
       entity_delete('annotation', $id);
-      // Send response
+
+      // Send response.
       drupal_add_http_header('Status', '204 NO CONTENT');
       return drupal_json_output(NULL);
     }
@@ -131,13 +139,13 @@ function annotation_api_destroy($id) {
 }
 
 /**
- * Annotation API search
+ * Annotation API search.
  */
 function annotation_api_search() {
   $total = 0;
   $records = array();
 
-  if (user_access('view annotations') ) {
+  if (user_access('view annotations')) {
     if (isset($_GET['user'])) {
       $username = $_GET['user'];
       $account = user_load(array('name' => check_plain($username)));
@@ -158,26 +166,26 @@ function annotation_api_search() {
     }
   }
 
-  $limit   = isset($_GET['limit'])   ? $_GET['limit']      : 20;
-  $offset  = isset($_GET['offset'])  ? $_GET['offset']     : 0;
-  $id      = isset($_GET['id'])      ? $_GET['id']         : NULL;
-  $created = isset($_GET['created']) ? $_GET['created']    : NULL;
-  $updated = isset($_GET['updated']) ? $_GET['updated']    : NULL;
-  $text    = isset($_GET['text'])    ? $_GET['text']       : NULL;
-  $quote   = isset($_GET['quote'])   ? $_GET['quote']      : NULL;
-  $uri     = isset($_GET['uri'])     ? $_GET['uri']        : NULL;
-  $tags    = isset($_GET['tags'])    ? explode(',', $tags) : NULL;
+  $limit = isset($_GET['limit']) ? $_GET['limit'] : 20;
+  $offset = isset($_GET['offset']) ? $_GET['offset'] : 0;
+  $id = isset($_GET['id']) ? $_GET['id'] : NULL;
+  $created = isset($_GET['created']) ? $_GET['created'] : NULL;
+  $updated = isset($_GET['updated']) ? $_GET['updated'] : NULL;
+  $text = isset($_GET['text']) ? $_GET['text'] : NULL;
+  $quote = isset($_GET['quote']) ? $_GET['quote'] : NULL;
+  $uri = isset($_GET['uri']) ? $_GET['uri'] : NULL;
+  $tags = isset($_GET['tags']) ? explode(',', $tags) : NULL;
 
-  // Initiate query
+  // Initiate query.
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'annotation');
 
-  // Add conditions to query
+  // Add conditions to query.
   if ($id) {
     $query->propertyCondition('uri', $id);
   }
   if ($uid) {
-    // Use uid instead of user
+    // Use uid instead of user.
     $query->propertyCondition('uid', $uid);
   }
   if ($created) {
@@ -196,16 +204,16 @@ function annotation_api_search() {
     $query->propertyCondition('uri', $uri);
   }
   if (is_array($tags)) {
-    foreach($tags as $tag) {
+    foreach ($tags as $tag) {
       $query->propertyCondition('tags', '"' . $tag . '"', 'LIKE');
     }
   }
 
-  // Get the total
+  // Get the total.
   $count_query = clone $query;
   $total = $count_query->count()->execute();
-  
-  // Set query range
+
+  // Set query range.
   if ($limit > 0) {
     $query->range($offset, $limit);
   }
@@ -228,14 +236,15 @@ function annotation_api_search() {
 }
 
 /**
- * Get data from stdin
+ * Get data from stdin.
+ *
  * @see http://php.net/manual/en/features.file-upload.put-method.php
  */
 function annotation_api_from_stdin() {
   $json = '';
-  // PUT data comes in on the stdin stream
+  // PUT data comes in on the stdin stream.
   $put = fopen('php://input', 'r');
-  // Read the data 1 KB at a time and write to the file
+  // Read the data 1 KB at a time and write to the file.
   while ($chunk = fread($put, 1024)) {
     $json .= $chunk;
   }
@@ -247,10 +256,10 @@ function annotation_api_from_stdin() {
 }
 
 /**
- * Prepare entity for api usage
+ * Prepare entity for api usage.
  */
 function annotation_api_entity_prepare($entity, $op) {
-  switch($op) {
+  switch ($op) {
     case 'read':
       $account = user_load($entity->uid);
       $entity->user = array(
@@ -266,13 +275,15 @@ function annotation_api_entity_prepare($entity, $op) {
         'type' => 'text/html',
       );
       break;
+
     case 'create':
       $entity->uid = $entity->user;
       unset($entity->user);
       break;
+
     case 'update':
       break;
+
   }
   return $entity;
 }
-
