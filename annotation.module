@@ -259,7 +259,7 @@ function annotation_menu() {
 /**
  * Access callback.
  */
-function annotation_access($op, $entity, $account = NULL, $entity_type = NULL) {
+function annotation_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
   global $user;
   if (!isset($account)) {
     $account = $user;
@@ -285,6 +285,7 @@ function annotation_access($op, $entity, $account = NULL, $entity_type = NULL) {
           || user_access('edit any annotations', $account)
           || (user_access('edit own annotations', $account) && ($entity->uid == $account->uid));
   }
+  return FALSE;
 }
 
 /**

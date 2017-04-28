@@ -258,7 +258,7 @@ function annotation_api_from_stdin() {
 /**
  * Prepare entity for api usage.
  */
-function annotation_api_entity_prepare($entity, $op) {
+function annotation_api_entity_prepare($entity, $op = NULL) {
   switch ($op) {
     case 'read':
       $account = user_load($entity->uid);
